@@ -12,7 +12,7 @@ public class ClientMain extends JFrame implements ActionListener {
     public JPanel cardPanel;
     public CardLayout cardLayout;
 
-    public ClientMain() {
+    public ClientMain() {  
         // CardLayout 설정
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);

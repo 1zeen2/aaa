@@ -6,6 +6,6 @@ import javax.swing.JPanel;
 public class ChattingPanel extends JPanel {
 
     public ChattingPanel() { 
-        setBackground(Color.GREEN);
+        setBackground(Color.GREEN); 
     }
 }

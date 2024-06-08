@@ -17,4 +17,4 @@ public class ControllerPanel extends JPanel {
         add("CHATTING", chP);
 
     }
-}
+} 

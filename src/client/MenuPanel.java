@@ -3,7 +3,7 @@ package client;
 import java.awt.GridLayout;
 import javax.swing.*;
 
-public class MenuPanel extends JPanel {
+public class MenuPanel extends JPanel { 
     public JButton b1, b2, b3, b4, b5;
 
     public MenuPanel() {

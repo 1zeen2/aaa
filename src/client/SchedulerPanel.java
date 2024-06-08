@@ -7,7 +7,7 @@ import javax.swing.table.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class SchedulerPanel extends JPanel { 
+public class SchedulerPanel extends JPanel {  
     JButton searchBtn, prevBtn, nextBtn;
     JLabel titleLa;
     JLabel monthLabel; 

@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SignUp extends JPanel {
+public class SignUp extends JPanel { 
     private ClientMain clientMain; 
     JLabel id, pw, pws, name, dob, email, pnum, zipcode, address, gender;
     JTextField id2, name2, dob2, email2, pnum2, zipcode2, address2;

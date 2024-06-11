@@ -3,10 +3,10 @@ package client;
 import java.awt.GridLayout;
 import javax.swing.*;
 
-public class MenuPanel extends JPanel { 
+public class Menu_Panel extends JPanel { 
     public JButton b1, b2, b3, b4, b5;
 
-    public MenuPanel() {
+    public Menu_Panel() {
         setLayout(new GridLayout(5, 1, 5, 5));
         
         b1 = new JButton("홈");

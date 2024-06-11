@@ -1,24 +1,27 @@
 package client;
 
 import javax.swing.*;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.table.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class SchedulerPanel extends JPanel {  
+public class Scheduler_Panel extends JPanel {
     JButton searchBtn, prevBtn, nextBtn;
     JLabel titleLa;
-    JLabel monthLabel; 
+    JLabel monthLabel;
     JTable table;
     DefaultTableModel model;
     public Calendar currentCalendar;
+    private int selectedRow = -1;
+    private int selectedColumn = -1;
+    private JTextArea jta;
 
-    public SchedulerPanel() {
+    public Scheduler_Panel() {
         currentCalendar = new GregorianCalendar();
         initializeComponents();
-        setLayout(null);
+        setLayout(null); // null 레이아웃 유지
         arrangeComponents();
         updateCalendar();
     }
@@ -37,15 +40,15 @@ public class SchedulerPanel extends JPanel {
                 updateCalendar();
             }
         });
-        
+
         nextBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                currentCalendar.add(Calendar.MONTH, 1); 
+                currentCalendar.add(Calendar.MONTH, 1);
                 updateCalendar();
             }
         });
-        
+
         // 라벨 초기화
         titleLa = new JLabel("Scheduler", JLabel.CENTER);
         titleLa.setFont(new Font("맑은 고딕", Font.BOLD, 40));
@@ -53,6 +56,11 @@ public class SchedulerPanel extends JPanel {
         // 월 정보 표시 라벨 생성
         monthLabel = new JLabel("", JLabel.CENTER);
         monthLabel.setFont(new Font("맑은 고딕", Font.BOLD, 40));
+
+        // JTextField 초기화
+        jta = new JTextArea();
+        jta.setEditable(false); // 사용자 입력 가능
+        jta.setFont(new Font("맑은 고딕", Font.PLAIN, 20)); // 폰트 설정
 
         // 테이블 컬럼 및 데이터 초기화
         String[] col = {"일", "월", "화", "수", "목", "금", "토"};
@@ -70,8 +78,39 @@ public class SchedulerPanel extends JPanel {
         table.setShowGrid(true); // 그리드 선 보이기 설정
         table.setRowHeight(87); // 행 높이 설정
 
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                selectedRow = table.getSelectedRow();
+                selectedColumn = table.getSelectedColumn();
+                table.repaint();
+
+                // 더블 클릭 이벤트 처리
+                if (e.getClickCount() == 2) {
+                    Integer day = (Integer) table.getValueAt(selectedRow, selectedColumn);
+                    if (day != null) {
+                        showAddSchedulePanel(day);
+                    }
+                }
+
+            }
+        });
+
         configureScrollPane();
         configureTable();
+    }
+
+    private void showAddSchedulePanel(int day) {
+        JFrame frame = new JFrame("일정 추가");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // 패널만 닫히도록 설정
+        frame.setSize(500, 350);
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null); // 화면 중앙에 표시
+
+        Add_Schedule addSchedulePanel = new Add_Schedule(day); // 부모 패널과 선택된 날짜 정보를 전달
+        frame.add(addSchedulePanel);
+
+        frame.setVisible(true);
     }
 
     private void configureScrollPane() {
@@ -147,6 +186,21 @@ public class SchedulerPanel extends JPanel {
         js.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // 수평 스크롤바 비활성화
         js.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER); // 수직 스크롤바 비활성화
         add(js);
+
+        jta.setBounds(50, 170, 250, 400); // JTextArea의 위치와 크기 설정
+        add(jta);
+        
+        jta.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // JTextArea를 클릭했을 때 실행되는 코드
+                // 해당 날짜의 일정을 가져와서 JTextArea에 표시하는 로직 추가
+                // 이 예시에서는 간단히 "해당 날짜의 일정"이라는 문자열을 JTextArea에 표시하도록 하겠습니다.
+                String schedule = getScheduleForSelectedDate(); // 해당 날짜의 일정 가져오기
+                jta.setText(schedule); // JTextArea에 일정 표시
+            }
+        });
+
     }
 
     // 현재 월을 반환하는 메서드
@@ -175,6 +229,13 @@ public class SchedulerPanel extends JPanel {
             }
         }
     }
+    
+    private String getScheduleForSelectedDate() {
+        // 여기에 선택한 날짜에 해당하는 일정을 가져오는 로직을 구현합니다.
+        // 예를 들어, 간단히 "해당 날짜의 일정"이라는 문자열을 반환하도록 구현할 수 있습니다.
+        return "해당 날짜의 일정";
+    }
+
 
     class CalendarCellRenderer extends JPanel implements TableCellRenderer {
         private JLabel dayLabel;
@@ -194,25 +255,43 @@ public class SchedulerPanel extends JPanel {
             int startOffset = dayOfWeek - 1;
 
             int day = row * 7 + column - startOffset + 1;
-            if (day > 0 && day <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-                dayLabel.setText(String.valueOf(day));
+            int numberOfDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+            // 이전 달의 마지막 날짜를 계산
+            int prevMonthLastDay = new GregorianCalendar(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), 0).get(Calendar.DAY_OF_MONTH);
+
+            boolean isCurrentMonth = day > 0 && day <= numberOfDays;
+            boolean isPrevMonth = day <= 0;
+            boolean isNextMonth = day > numberOfDays;
+
+            if (isCurrentMonth) {
+                dayLabel.setForeground(Color.BLACK); // 이번 달의 날짜는 검정색
+            } else if (isPrevMonth) {
+                dayLabel.setForeground(new Color(150, 150, 150)); // 이전 달의 날짜는 아주 연한 회색
+                day = prevMonthLastDay + day; // 이전 달의 날짜로 변경
             } else {
-                dayLabel.setText("");
+                dayLabel.setForeground(new Color(150, 150, 150)); // 다음 달의 날짜는 아주 연한 회색
+                day = day - numberOfDays; // 다음 달의 날짜로 변경
             }
 
+            dayLabel.setText(value == null ? "" : String.valueOf(day));
+
+            // 배경색 설정
             if (column == 0) {
-                setBackground(new Color(255, 204, 204)); // 연한 분홍색
+                setBackground(new Color(255, 204, 204)); // 일요일 배경색
             } else if (column == 6) {
-                setBackground(new Color(204, 229, 255)); // 연한 하늘색
+                setBackground(new Color(204, 229, 255)); // 토요일 배경색
             } else {
-                setBackground(Color.WHITE); // 나머지는 흰색 배경
+                setBackground(Color.WHITE); // 일반 배경색
             }
 
-            // 테두리 설정
-            setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, Color.BLACK)); // 아래쪽과 오른쪽 테두리만 설정
+            if (row == selectedRow && column == selectedColumn) {
+                setBorder(BorderFactory.createLineBorder(Color.BLACK, 4)); // 테두리를 검은색으로 두껍게 설정
+            } else {
+                setBorder(null); // 선택되지 않은 셀의 테두리 제거
+            }
 
             return this;
-        } 
+        }
     }
-
 }
